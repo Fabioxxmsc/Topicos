@@ -1,0 +1,5 @@
+rm -rf /home/fabio/sandbox_memphis/my_testcase
+memphis-gen my_testcase.yaml
+memphis-app my_testcase.yaml merge
+memphis-app my_testcase.yaml -all merge_scenario.yaml
+memphis-run my_testcase.yaml merge_scenario.yaml 50
