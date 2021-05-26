@@ -1,7 +1,7 @@
 #include <api.h>
 #include <stdlib.h>
 
-#define TAM 8
+#define TAM 480
 #define QDT 4
 #define tam TAM / QDT
 
