@@ -1,120 +1,106 @@
 #include <api.h>
 #include <stdlib.h>
 
-#define TAM 12
+#define TAM 8
 #define QDT 4
 #define tam TAM / QDT
 
 #define SIM 1
 #define NAO 0
 
-#define ID 0
-
 #define STATUS 0
 #define VALOR 1
+
+// MSG_SIZE
+
+unsigned int slaves[QDT] = {merge_0, merge_1, merge_2, merge_3};
 
 Message msg[QDT];
 
 int i;
 int j;
 
-void MostraVetor(int vet[QDT][tam]);
-void GerarVetor(int vet[QDT][tam]);
-void GerarMsg(int vet[QDT][tam]);
+void ZerarMsg();
+void MostraVetor(int vet[TAM]);
+void GerarVetor(int vet[TAM]);
+void GerarMsg(int vet[TAM]);
 void EnviaVetor();
 void RecuperaVetor();
-void OrganizaVetor(int vet[QDT][tam]);
+void OrganizaVetor(int vet[TAM]);
 
 int main(){
-    int vetor[QDT][tam];
+    int vetor[TAM];
 
+    ZerarMsg();
     GerarVetor(vetor);
     MostraVetor(vetor);
     GerarMsg(vetor);
     EnviaVetor();
     RecuperaVetor();
     OrganizaVetor(vetor);
-    Echo("\nVetor Ordenado: \n");
     MostraVetor(vetor);
 
     return 0;
 }
 
-void GerarVetor(int vet[QDT][tam]){
-    vet[0][0] = 11;
-    vet[0][1] = 10;
-    vet[0][2] = 9;
-    vet[1][0] = 8;
-    vet[1][1] = 7;
-    vet[1][2] = 6;
-    vet[2][0] = 5;
-    vet[2][1] = 4;
-    vet[2][2] = 3;
-    vet[3][0] = 2;
-    vet[3][1] = 1;
-    vet[3][2] = 0;
-    //for(i = 0; i < QDT; i++){
-    //    for(j = 0; j < tam; j++){
-    //        vet[i][j] = (i + j + 1) * 3;
-    //    }
-   // }
+void ZerarMsg(){
+    for (i = 0; i < QDT; i++)
+      msg[i].length = 0;
 }
 
-void GerarMsg(int vet[QDT][tam]){
-    int lenght;
+void GerarVetor(int vet[TAM]){
+    for(i = 0; i < TAM; i++){
+        if (i % 2 == 0)
+            vet[i] = (i + 2) * 2;
+        else
+            vet[i] = (i + 3) * 3;
+    }
+}
+
+void GerarMsg(int vet[TAM]){
+    int index_vet = 0;
     for(i = 0; i < QDT; i++){
         msg[i].msg[0] = i;
-        lenght = 1;
+        msg[i].length++;
+
         for(j = 1; j <= tam; j++){
-            msg[i].msg[j] = vet[i][j - 1];
-            lenght++;
+            msg[i].msg[j] = vet[index_vet];
+            msg[i].length++;
+            index_vet++;
         }
-        msg[i].length = lenght;
     }
 }
 
 void EnviaVetor(){
-    Echo("Enviando vetor escravo 0");
-    Send(&msg[0], merge_0);
-    Echo("Enviando vetor escravo 1");
-    Send(&msg[1], merge_1);
-    Echo("Enviando vetor escravo 2");
-    Send(&msg[2], merge_2);
-    Echo("Enviando vetor escravo 3");
-    Send(&msg[3], merge_3);
+    for (i = 0; i < QDT; i++){
+        Echo("Enviando vetor escravo");
+        Echo(itoa(i));
+        Send(&msg[i], slaves[i]);
+    }
 }
 
 void RecuperaVetor(){
-    Echo("Aguardando Vetor 3...");
-    Receive(&msg[3], merge_3);
-    Echo("Recebido Vetor 3");
-
-    Echo("Aguardando Vetor 2...");
-    Receive(&msg[2], merge_2);
-    Echo("Recebido Vetor 2");
-
-    Echo("Aguardando Vetor 1...");
-    Receive(&msg[1], merge_1);            
-    Echo("Recebido Vetor 1");
-
-    Echo("Aguardando Vetor 0...");
-    Receive(&msg[0], merge_0);
-    Echo("Recebido Vetor 0");
+    for (i = QDT - 1; i >= 0; i--){
+        Echo("Aguardando Vetor");
+        Echo(itoa(i));        
+        Receive(&msg[i], slaves[i]);
+        Echo("Recebido Vetor");
+    }
 }
 
-void OrganizaVetor(int vet[QDT][tam]){
+void OrganizaVetor(int vet[TAM]){
+    int index_vet = 0;
     for(i = 0; i < QDT; i++){
         for(j = 1; j <= tam; j++){
-            vet[i][j - 1] = msg[i].msg[j];
+            vet[index_vet] = msg[i].msg[j];
+            index_vet++;
         }
     }
 }
 
-void MostraVetor(int vet[QDT][tam]){
-    Echo("Vetor: ");
-    for(i = 0; i < QDT; i++){
-        for(j = 1; j <= tam; j++){
-            Echo(itoa(vet[i][j]));
-        }
+void MostraVetor(int vet[TAM]){
+    Echo("Vetor");
+    for(i = 0; i < TAM; i++){
+        Echo(itoa(vet[i]));
     }
 }

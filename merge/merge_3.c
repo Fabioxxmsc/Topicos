@@ -3,14 +3,8 @@
 
 Message msg;
 
-#define TAM 12
-#define QDT 4
-#define tam TAM / QDT
-
 #define SIM 1
 #define NAO 0
-
-#define ID 0
 
 #define STATUS 0
 #define VALOR 1
@@ -18,12 +12,11 @@ Message msg;
 void quicksort(int values[], int began, int end);
 
 int main(){
-
     Echo("Escravo 3 iniciou");
     Receive(&msg, merge_master);
     Echo("Escravo 3 recebeu de master");
 
-    if(msg.length <= 1){
+    if (msg.length <= 1){
         Echo("Escravo 3 retorna mensagem ao master");
         Send(&msg, merge_master);
         return 0;
@@ -34,21 +27,18 @@ int main(){
     int id = msg.msg[0];
     Message msgCom;
 
-    for (i = 1; i <= msg.length; i++)
+    for (i = 1; i < msg.length; i++)
         vetor[i - 1] = msg.msg[i];
 
     do{
-        Echo("Escravo 3 ordenando...");
         quicksort(vetor, 0, msg.length - 1);
 
-        for (i = 0; i < msg.length; i++)
-            msg.msg[i + 1] = vetor[i];
+        for (i = 1; i < msg.length; i++)
+            msg.msg[i] = vetor[i - 1];
         
-        Echo("Escravo 3 aguardando escravo 2...");
         Receive(&msgCom, merge_2);
-        Echo("Escravo 2 respondeu escravo 3");
 
-        if (msgCom.msg[VALOR] < vetor[0]){
+        if (msgCom.msg[VALOR] <= vetor[0]){
             msgCom.length = 2;
             msgCom.msg[STATUS] = SIM;
 
@@ -59,18 +49,10 @@ int main(){
             Send(&msg, merge_master);
             break;
         } else {
-            Echo("Escravo 3 copia");
-            Echo(itoa(msgCom.msg[VALOR]));
-            Echo("do escravo 2");
-
             temp               = vetor[0];
             vetor[0]           = msgCom.msg[VALOR];
             msgCom.msg[VALOR]  = temp;
             msgCom.msg[STATUS] = NAO;
-
-            Echo("Escravo 3 envia");
-            Echo(itoa(msgCom.msg[VALOR]));
-            Echo("para escravo 2");
             Send(&msgCom, merge_2);
         }
     } while (SIM);
