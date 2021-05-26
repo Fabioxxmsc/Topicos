@@ -1,6 +1,6 @@
 import os
 
-os.system("rm -rf /home/fabio/sandbox_memphis/my_testcase")
+os.system("rm -rf /home/$USERNAME/sandbox_memphis/my_testcase")
 os.system("memphis-gen my_testcase.yaml")
 os.system("memphis-app my_testcase.yaml merge")
 os.system("memphis-app my_testcase.yaml -all merge_scenario.yaml")
